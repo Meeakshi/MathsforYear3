@@ -1,10 +1,10 @@
-<title>Year 3 Maths Quest</title>
+<title>Primary Maths Quest</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Fredoka:wght@500;600;700&display=swap">
 <style>
-/* Layout: squared exercise-book paper; topic strands stacked as colour-coded rows of skill tiles; quiz = one centred question card */
+/* Layout: squared exercise-book paper; year picker as six colour-coded cards; each year's strands as rows of skill tiles; quiz = one centred question card */
 :root{
   --paper:#F6F8FE; --grid:#DFE6F6; --card:#FFFFFF; --line:#D3DBEE;
   --ink:#1D2856; --soft:#5A648C;
@@ -12,6 +12,8 @@
   --ruler:#FBE7A1; --on:#FFFFFF;
   --c-num:#DD4B25; --c-add:#D97706; --c-mul:#0F8A74; --c-frac:#7446D0;
   --c-meas:#2470C2; --c-mt:#A8721A; --c-geo:#CC3378; --c-stat:#4F7F16;
+  --c-ratio:#0E7C9A; --c-alg:#5B57C9;
+  --c-y1:var(--c-num); --c-y2:var(--c-add); --c-y3:var(--c-mul); --c-y4:var(--c-frac); --c-y5:var(--c-meas); --c-y6:var(--c-geo);
   --c:var(--ink);
   --f-display:"Fredoka","Arial Rounded MT Bold","Trebuchet MS",system-ui,sans-serif;
   --f-body:"Andika","Trebuchet MS",Verdana,system-ui,sans-serif;
@@ -23,6 +25,7 @@
   --ruler:#5B5130; --on:#10201A;
   --c-num:#FF8A65; --c-add:#FFB547; --c-mul:#4FD1B5; --c-frac:#B79CFF;
   --c-meas:#6FB3FF; --c-mt:#E7B96A; --c-geo:#FF85B8; --c-stat:#A7D86A;
+  --c-ratio:#5CCBE8; --c-alg:#A5A2FF;
   color-scheme:dark}}
 :root[data-theme="dark"]{
   --paper:#17251F; --grid:#20332B; --card:#1F3029; --line:#34503F;
@@ -31,6 +34,7 @@
   --ruler:#5B5130; --on:#10201A;
   --c-num:#FF8A65; --c-add:#FFB547; --c-mul:#4FD1B5; --c-frac:#B79CFF;
   --c-meas:#6FB3FF; --c-mt:#E7B96A; --c-geo:#FF85B8; --c-stat:#A7D86A;
+  --c-ratio:#5CCBE8; --c-alg:#A5A2FF;
   color-scheme:dark}
 
 *{box-sizing:border-box}
@@ -178,468 +182,44 @@ footer{margin-top:44px;color:var(--soft);font-size:14px;max-width:70ch}
   .mixbig{width:100%}
   .brand span:last-child{font-size:19px}
 }
+
+/* year picker & additions */
+.topin{flex-wrap:wrap}
+.tright{display:flex;align-items:center;gap:8px}
+.yearbtn{background:var(--card);border:2px solid var(--ink);border-radius:999px;padding:4px 14px;font-family:var(--f-display);font-weight:600;font-size:17px}
+.yearbtn:hover{background:var(--ink);color:var(--paper)}
+.hero.solo{grid-template-columns:1fr}
+.years{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:22px}
+.ycard{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 4px 0 var(--line);transition:transform .12s,border-color .12s}
+.ycard:hover,.ycard.cur{border-color:var(--c)}
+.ycard:hover{transform:translateY(-2px)}
+.ynum{width:62px;height:62px;border-radius:16px;background:var(--c);color:var(--on);display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:36px}
+.ytxt{display:flex;flex-direction:column;min-width:0}
+.yname{font-family:var(--f-display);font-weight:600;font-size:22px;line-height:1.1}
+.yage{font-weight:700;color:var(--c)}
+.yblurb{font-size:14px;color:var(--soft);line-height:1.35;margin-top:2px}
+.ystar{display:flex;align-items:center;gap:4px;font-family:var(--f-display);color:var(--soft);font-variant-numeric:tabular-nums;align-self:start}
+.hero .link{text-decoration:underline;text-underline-offset:3px}
+.crow{grid-template-columns:repeat(var(--n,4),1.05em)}
+.qtext,.choice{overflow-wrap:anywhere}
+.mxn{display:inline-flex;align-items:center;gap:.08em;white-space:nowrap}
+.vis .shp2{fill:color-mix(in srgb,var(--c) 10%,var(--card));stroke:var(--c);stroke-width:4;stroke-linejoin:round}
+.vis .shp3{fill:color-mix(in srgb,var(--c) 38%,var(--card));stroke:var(--c);stroke-width:4;stroke-linejoin:round}
+.dtable{font-variant-numeric:tabular-nums}
+.dtable caption{font-family:var(--f-display);font-weight:600;padding-bottom:6px}
+.pad .wide{grid-column:span 2}
+.big{font-size:clamp(28px,6.5vw,46px)}
+@media (max-width:640px){.years{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
 <div id="app"></div>
 
-<script>
-(()=>{
-/* ---------- helpers ---------- */
-const R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
-const pick=a=>a[Math.floor(Math.random()*a.length)];
-const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
-const alt=(...f)=>pick(f)();
-const range=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
-const pad=n=>String(n).padStart(2,'0');
-const big=s=>`<span class="big">${s}</span>`;
-const BL='<span class="blank">?</span>';
-const fr=(n,d)=>`<span class="fr"><b>${n}</b><b>${d}</b></span>`;
-const cap=s=>s[0].toUpperCase()+s.slice(1);
-const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const NAMES=['Amara','Leo','Priya','Jack','Zara','Oliver','Mei','Noah','Isla','Kofi','Sofia','Arjun','Ruby','Sami','Freya','Yusuf'];
-const nm=()=>pick(NAMES);
-const fmt=p=>p<100?`${p}p`:`£${(p/100).toFixed(2)}`;
-
-function mc(q,ans,wrong,o={}){ans=String(ans);let c;
-  if(o.keep){c=wrong.map(String)}
-  else{c=[ans];for(const w of wrong){const s=String(w);if(!c.includes(s)&&c.length<4)c.push(s)}c=shuffle(c)}
-  return Object.assign({type:'choice',q,answer:ans,choices:c},o)}
-function num(q,ans,o={}){return Object.assign({type:'num',q,answer:String(ans)},o)}
-
-const ONES=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
-const TENS=['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
-function words(n){if(n<20)return ONES[n];if(n<100)return TENS[Math.floor(n/10)]+(n%10?'-'+ONES[n%10]:'');const h=Math.floor(n/100),r=n%100;return ONES[h]+' hundred'+(r?' and '+words(r):'')}
-
-/* ---------- drawings ---------- */
-const svg=(w,h,inner,label)=>`<svg class="vis" style="max-width:${w}px" viewBox="0 0 ${w} ${h}" role="img" aria-label="${label}">${inner}</svg>`;
-const f1=n=>n.toFixed(1);
-function poly(n,cx,cy,r,rot,jit){const p=[];for(let i=0;i<n;i++){const a=(rot+i*360/n)*Math.PI/180,rr=r*(jit?jit[i]:1);p.push(f1(cx+rr*Math.cos(a))+','+f1(cy+rr*Math.sin(a)))}return p.join(' ')}
-
-function nline(start,step,k,labs){const x0=40,dx=48;let s=`<line x1="18" y1="64" x2="542" y2="64" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>`;
-  for(let i=0;i<=10;i++){const x=x0+i*dx,maj=i%5===0;s+=`<line x1="${x}" y1="${maj?50:55}" x2="${x}" y2="${maj?78:73}" stroke="currentColor" stroke-width="${maj?3:2}"/>`;
-    const l=labs?labs(i):(i%10===0?start+i*step:null);if(l!=null)s+=`<text x="${x}" y="104" text-anchor="middle" font-size="20">${l}</text>`}
-  const ax=x0+k*dx;s+=`<path d="M${ax} 46 l-11 -20 h22 z" class="acc"/>`;
-  return svg(560,116,s,'number line with an arrow')}
-
-function fshape(k,d,kind){const idx=shuffle(range(0,d-1)).slice(0,k);const on=i=>idx.includes(i);let s='';
-  if(kind==='bar'){const w=420/d;for(let i=0;i<d;i++)s+=`<rect x="${f1(20+i*w)}" y="16" width="${f1(w)}" height="80" class="${on(i)?'sh':'un'}"/>`;return svg(460,112,s,'fraction bar')}
-  const cx=110,cy=110,r=94;for(let i=0;i<d;i++){const a0=(i/d)*2*Math.PI-Math.PI/2,a1=((i+1)/d)*2*Math.PI-Math.PI/2;
-    s+=`<path d="M${cx} ${cy} L${f1(cx+r*Math.cos(a0))} ${f1(cy+r*Math.sin(a0))} A${r} ${r} 0 0 1 ${f1(cx+r*Math.cos(a1))} ${f1(cy+r*Math.sin(a1))} Z" class="${on(i)?'sh':'un'}" stroke-linejoin="round"/>`}
-  return svg(220,220,s,'fraction circle')}
-
-function fbars(a,b,d){let s='';const W=420,w1=W/b,w2=W/d;
-  for(let i=0;i<b;i++)s+=`<rect x="${f1(20+i*w1)}" y="12" width="${f1(w1)}" height="50" class="${i<a?'sh':'un'}"/>`;
-  for(let i=0;i<d;i++)s+=`<rect x="${f1(20+i*w2)}" y="78" width="${f1(w2)}" height="50" class="un"/>`;
-  return svg(460,140,s,'two fraction bars')}
-
-const ROM=['XII','I','II','III','IV','V','VI','VII','VIII','IX','X','XI'];
-function clockSvg(h,m,roman){let s=`<circle cx="110" cy="110" r="102" class="face"/>`;
-  for(let i=0;i<60;i++){const a=i*6*Math.PI/180,l=i%5?6:12,r1=96,r2=96-l;s+=`<line x1="${f1(110+r1*Math.sin(a))}" y1="${f1(110-r1*Math.cos(a))}" x2="${f1(110+r2*Math.sin(a))}" y2="${f1(110-r2*Math.cos(a))}" stroke="currentColor" stroke-width="${i%5?1.5:3}"/>`}
-  for(let i=0;i<12;i++){const a=i*30*Math.PI/180,r=roman?69:71;s+=`<text x="${f1(110+r*Math.sin(a))}" y="${f1(110-r*Math.cos(a)+7)}" text-anchor="middle" font-size="${roman?16:22}" font-weight="600">${roman?ROM[i]:(i||12)}</text>`}
-  const ha=((h%12)+m/60)*30*Math.PI/180,ma=m*6*Math.PI/180;
-  s+=`<line x1="110" y1="110" x2="${f1(110+48*Math.sin(ha))}" y2="${f1(110-48*Math.cos(ha))}" stroke="currentColor" stroke-width="9" stroke-linecap="round"/>`;
-  s+=`<line x1="110" y1="110" x2="${f1(110+80*Math.sin(ma))}" y2="${f1(110-80*Math.cos(ma))}" class="accs" stroke-width="5" stroke-linecap="round"/>`;
-  s+=`<circle cx="110" cy="110" r="7" fill="currentColor"/>`;
-  return svg(220,220,s,'analogue clock')}
-
-const COINS={1:{l:'1p',r:19,f:'#C98250'},2:{l:'2p',r:25,f:'#C98250'},5:{l:'5p',r:17,f:'#D5DAE0'},10:{l:'10p',r:24,f:'#D5DAE0'},20:{l:'20p',r:22,f:'#D5DAE0',n:7},50:{l:'50p',r:28,f:'#D5DAE0',n:7},100:{l:'£1',r:24,f:'#E6BE55',n:12},200:{l:'£2',r:29,f:'#E6BE55',inner:'#D5DAE0'}};
-function coinsSvg(list){let x=8,s='';for(const v of list){const c=COINS[v],cx=x+c.r,cy=36;
-  s+=c.n?`<polygon points="${poly(c.n,cx,cy,c.r+1,-90)}" fill="${c.f}" stroke="#6B5A3E" stroke-width="2" stroke-linejoin="round"/>`:`<circle cx="${cx}" cy="${cy}" r="${c.r}" fill="${c.f}" stroke="#6B5A3E" stroke-width="2"/>`;
-  if(c.inner)s+=`<circle cx="${cx}" cy="${cy}" r="${c.r-8}" fill="${c.inner}" stroke="#6B5A3E" stroke-width="1"/>`;
-  s+=`<text x="${cx}" y="${cy+6}" text-anchor="middle" font-size="${c.r>20?17:13}" font-weight="700" fill="#2B2117">${c.l}</text>`;x+=c.r*2+12}
-  return svg(x,74,s,'coins')}
-
-function rulerSvg(start,L){const u=34,x0=24;let s=`<rect x="${x0-14}" y="74" width="${15*u+28}" height="58" rx="6" class="ruler"/>`;
-  for(let i=0;i<=150;i++){const x=x0+i*u/10,l=i%10===0?22:i%5===0?15:9;s+=`<line x1="${f1(x)}" y1="74" x2="${f1(x)}" y2="${74+l}" stroke="currentColor" stroke-width="${i%10===0?2:1}"/>`;if(i%10===0)s+=`<text x="${f1(x)}" y="120" text-anchor="middle" font-size="15">${i/10}</text>`}
-  s+=`<text x="${x0+15*u-4}" y="128" text-anchor="end" font-size="11">cm</text>`;
-  const a=x0+start*u,b=x0+(start+L)*u;
-  s+=`<rect x="${f1(a)}" y="30" width="${f1(Math.max(b-a-22,4))}" height="24" class="pencil"/><polygon points="${f1(b-22)},30 ${f1(b)},42 ${f1(b-22)},54" class="tip"/><rect x="${f1(a)}" y="30" width="12" height="24" class="rub"/>`;
-  s+=`<line x1="${f1(a)}" y1="56" x2="${f1(a)}" y2="74" stroke="currentColor" stroke-dasharray="3 3"/><line x1="${f1(b)}" y1="44" x2="${f1(b)}" y2="74" stroke="currentColor" stroke-dasharray="3 3"/>`;
-  return svg(15*u+52,140,s,'a pencil next to a ruler')}
-
-function angleSvg(th,rot){const cx=150,cy=118,L=95,P=(a,r)=>[cx+r*Math.cos(a*Math.PI/180),cy-r*Math.sin(a*Math.PI/180)];
-  const [x1,y1]=P(rot,L),[x2,y2]=P(rot+th,L);
-  let s=`<line x1="${cx}" y1="${cy}" x2="${f1(x1)}" y2="${f1(y1)}" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><line x1="${cx}" y1="${cy}" x2="${f1(x2)}" y2="${f1(y2)}" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>`;
-  if(th===90){const [a1,b1]=P(rot,24),[a2,b2]=P(rot+90,24);s+=`<polyline points="${f1(a1)},${f1(b1)} ${f1(a1+a2-cx)},${f1(b1+b2-cy)} ${f1(a2)},${f1(b2)}" fill="none" class="accs" stroke-width="3"/>`}
-  else{const [a1,b1]=P(rot,32),[a2,b2]=P(rot+th,32);s+=`<path d="M${f1(a1)} ${f1(b1)} A32 32 0 0 0 ${f1(a2)} ${f1(b2)}" fill="none" class="accs" stroke-width="3"/>`}
-  s+=`<circle cx="${cx}" cy="${cy}" r="5" fill="currentColor"/>`;
-  return svg(300,236,s,'an angle')}
-
-function seg(cx,cy,a,len){const r=a*Math.PI/180,dx=Math.cos(r)*len/2,dy=Math.sin(r)*len/2;return `<line x1="${f1(cx-dx)}" y1="${f1(cy+dy)}" x2="${f1(cx+dx)}" y2="${f1(cy-dy)}" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>`}
-
-function compassSvg(dir){const A={North:0,East:90,South:180,West:270}[dir]*Math.PI/180;
-  let s=`<circle cx="120" cy="115" r="78" class="face"/>`;
-  [['N',120,28],['E',214,122],['S',120,214],['W',26,122]].forEach(([t,x,y])=>s+=`<text x="${x}" y="${y}" text-anchor="middle" font-size="22" font-weight="700">${t}</text>`);
-  const tx=120+60*Math.sin(A),ty=115-60*Math.cos(A);
-  s+=`<line x1="120" y1="115" x2="${f1(tx)}" y2="${f1(ty)}" class="accs" stroke-width="7" stroke-linecap="round"/><circle cx="${f1(tx)}" cy="${f1(ty)}" r="9" class="acc"/><circle cx="120" cy="115" r="6" fill="currentColor"/>`;
-  return svg(240,230,s,'compass showing which way you face')}
-
-function barSvg(cats,vals,step,title){const W=540,L=56,B=250,T=34,ph=B-T,bw=(W-L-14)/cats.length;let s='';
-  for(let i=0;i<=10;i++){const y=B-i*ph/10;s+=`<line x1="${L}" y1="${f1(y)}" x2="${W-10}" y2="${f1(y)}" class="grid"/><text x="${L-8}" y="${f1(y+5)}" text-anchor="end" font-size="14">${i*step}</text>`}
-  cats.forEach((c,i)=>{const h=vals[i]/(step*10)*ph,x=L+i*bw+bw*.2;s+=`<rect x="${f1(x)}" y="${f1(B-h)}" width="${f1(bw*.6)}" height="${f1(h)}" class="bar"/><text x="${f1(L+i*bw+bw/2)}" y="${B+24}" text-anchor="middle" font-size="15">${c}</text>`});
-  s+=`<line x1="${L}" y1="${T-8}" x2="${L}" y2="${B}" stroke="currentColor" stroke-width="2"/><line x1="${L}" y1="${B}" x2="${W-10}" y2="${B}" stroke="currentColor" stroke-width="2"/>`;
-  s+=`<text x="${W/2+20}" y="18" text-anchor="middle" font-size="17" font-weight="600">${title}</text>`;
-  return svg(W,284,s,'bar chart')}
-
-function pictoSvg(cats,vals,k,title){const rowH=46,L=118;let s=`<text x="210" y="20" text-anchor="middle" font-size="17" font-weight="600">${title}</text>`;
-  cats.forEach((c,i)=>{const y=34+i*rowH;s+=`<text x="${L-14}" y="${y+29}" text-anchor="end" font-size="16">${c}</text><line x1="${L}" y1="${y}" x2="${L}" y2="${y+rowH}" stroke="currentColor" stroke-width="2"/>`;
-    let n=vals[i]/k,x=L+24;while(n>=1){s+=`<circle cx="${x}" cy="${y+23}" r="15" class="bar"/>`;x+=38;n-=1}
-    if(n>0)s+=`<path d="M${x} ${y+8} A15 15 0 0 0 ${x} ${y+38} Z" class="bar"/>`;
-    s+=`<line x1="10" y1="${y+rowH}" x2="410" y2="${y+rowH}" class="grid"/>`});
-  const ky=34+cats.length*rowH+30;
-  s+=`<circle cx="${L+24}" cy="${ky}" r="15" class="bar"/><text x="${L+48}" y="${ky+6}" font-size="17" font-weight="600">= ${k} children</text>`;
-  return svg(420,ky+26,s,'pictogram')}
-
-function tallyMarks(v,x0,y0){let s='',x=x0;const g=Math.floor(v/5),r=v%5,ln=(x)=>`<line x1="${x}" y1="${y0}" x2="${x}" y2="${y0+26}" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>`;
-  for(let i=0;i<g;i++){for(let j=0;j<4;j++)s+=ln(x+j*8);s+=`<line x1="${x-5}" y1="${y0+21}" x2="${x+29}" y2="${y0+5}" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>`;x+=46}
-  for(let j=0;j<r;j++)s+=ln(x+j*8);return s}
-function tallyTable(cats,vals,title){return `<table class="dtable"><caption style="font-family:var(--f-display);font-weight:600;padding-bottom:6px">${title}</caption><tr><th>Choice</th><th>Tally</th></tr>${cats.map((c,i)=>`<tr><td>${c}</td><td><svg width="190" height="32" viewBox="0 0 190 32" style="color:var(--ink)" role="img" aria-label="tally marks">${tallyMarks(vals[i],8,3)}</svg></td></tr>`).join('')}</table>`}
-
-function colVis(a,b,op){const row=(sg,n)=>`<div class="crow"><span>${sg}</span>${String(n).padStart(3,' ').split('').map(c=>`<span>${c.trim()}</span>`).join('')}</div>`;
-  return `<div style="text-align:center"><div class="colsum">${row('',a)}${row(op,b)}<div class="crow ans"><span></span><span>?</span><span>?</span><span>?</span></div></div></div>`}
-
-/* ---------- strands & skills ---------- */
-const STRANDS=[
-  {id:'num',name:'Number & place value',glyph:'123'},
-  {id:'add',name:'Adding & subtracting',glyph:'+ −'},
-  {id:'mul',name:'Times tables & dividing',glyph:'× ÷'},
-  {id:'frac',name:'Fractions',glyph:'½'},
-  {id:'meas',name:'Length, mass & capacity',glyph:'cm'},
-  {id:'mt',name:'Money & time',glyph:'£'},
-  {id:'geo',name:'Shapes, angles & lines',glyph:'◺'},
-  {id:'stat',name:'Charts & tables',glyph:'▁▃▆'}];
-const SK=[];const skill=(id,strand,name,eg,gen)=>SK.push({id,strand,name,eg,gen});
-
-/* NUMBER */
-skill('pv','num','Place value','What is the 4 worth in 472?',()=>{const n=R(101,999),s=String(n),h=+s[0]*100,t=+s[1]*10,o=+s[2];
-  return alt(
-    ()=>{let p;do{p=R(0,2)}while(s[p]==='0');const d=+s[p],v=d*[100,10,1][p];const shown=s.split('').map((c,i)=>i===p?`<span class="hl">${c}</span>`:c).join('');
-      return mc(`What is the <b>${d}</b> worth in this number?<br>${big(shown)}`,v,[d,d*10,d*100,d*1000].filter(x=>x!==v),{why:`The ${d} is in the <b>${['hundreds','tens','ones'][p]}</b> column, so it is worth ${v}.`})},
-    ()=>{const parts=[h,t,o],m=R(0,2);return num(`Fill in the missing number.<br>${big(`${n} = ${parts.map((x,i)=>i===m?BL:x).join(' + ')}`)}`,parts[m],{why:`${n} is ${s[0]} hundreds, ${s[1]} tens and ${s[2]} ones: ${h} + ${t} + ${o}.`})},
-    ()=>num(`What number has <b>${s[0]} hundred${s[0]==='1'?'':'s'}</b>, <b>${s[1]} ten${s[1]==='1'?'':'s'}</b> and <b>${s[2]} one${s[2]==='1'?'':'s'}</b>?`,n,{why:`${h} + ${t} + ${o} = ${n}.`}))});
-
-skill('moreless','num','10 or 100 more or less','What is 100 more than 457?',()=>{const amt=pick([10,100]),more=Math.random()<.5;const n=more?R(100,999-amt):R(100+amt,999);const ans=more?n+amt:n-amt;
-  return num(`What is <b>${amt} ${more?'more':'less'}</b> than ${big(n)}?`,ans,{why:`${more?'Add':'Take away'} one ${amt===10?'ten':'hundred'}: ${n} ${more?'+':'−'} ${amt} = ${ans}.`})});
-
-skill('compare','num','Compare numbers','436 ? 463 — use < > or =',()=>{const a=R(100,999);let b;const k=Math.random();
-  if(k<.1)b=a;else if(k<.45){const s=String(a);b=+(s[0]+s[2]+s[1])}else if(k<.75)b=Math.floor(a/100)*100+R(0,99);else b=R(100,999);
-  const sg=a<b?'<':a>b?'>':'=';
-  return mc(`Which sign goes in the box?<br>${big(`${a} ${BL} ${b}`)}`,sg,['<','>','='],{keep:true,why:sg==='='?'They are the same number.':`${Math.max(a,b)} is greater than ${Math.min(a,b)}. The open side of the sign always faces the bigger number.`})});
-
-skill('order','num','Order numbers','Which is the biggest: 352, 523, 325, 532?',()=>{let ds;do{ds=[R(1,9),R(1,9),R(1,9)]}while(new Set(ds).size<3);
-  const [a,b,c]=ds;const perms=[[a,b,c],[a,c,b],[b,a,c],[b,c,a],[c,a,b],[c,b,a]].map(p=>+p.join(''));const opts=shuffle(perms).slice(0,4);const most=Math.random()<.5;const ans=most?Math.max(...opts):Math.min(...opts);
-  return mc(`Which number is the <b>${most?'greatest':'smallest'}</b>?`,ans,opts,{why:`Compare the hundreds first, then the tens, then the ones. ${ans} is the ${most?'greatest':'smallest'}.`})});
-
-skill('count','num','Counting in steps','Count in 4s, 8s, 50s and 100s',()=>{const step=pick([3,4,8,50,100]);const start=step>=50?step*R(0,5):step*R(0,8);const back=Math.random()<.35;
-  let seq=range(0,4).map(i=>start+i*step);if(back)seq.reverse();const m=R(1,4);
-  return num(`Count in <b>${step}s</b>. What is the missing number?<br>${big(seq.map((x,i)=>i===m?BL:x).join(', '))}`,seq[m],{why:`Each number is ${step} ${back?'less':'more'} than the one before it.`})});
-
-skill('words','num','Numbers in words','“three hundred and six”',()=>{const h=R(1,9),f=R(0,2);const n=f===0?h*100+R(1,9):f===1?h*100+R(1,9)*10:h*100+R(11,99);const s=String(n),r=n%100;
-  const ds=[h*1000+r,+(s[0]+s[2]+s[1]),n+10,n-10,h*10+r%10,n+100].filter(x=>x>0&&x!==n);
-  if(Math.random()<.5)return mc(`Which number is <b>“${words(n)}”</b>?`,n,ds,{why:`${cap(words(n))} is ${s[0]} hundreds, ${s[1]} tens and ${s[2]} ones: ${n}.`});
-  return mc(`How do you write ${big(n)} in words?`,cap(words(n)),ds.filter(x=>x<1000).map(x=>cap(words(x))),{why:`${n} has ${s[0]} hundreds, ${s[1]} tens and ${s[2]} ones.`})});
-
-skill('nline','num','Number lines','Where is the arrow pointing?',()=>{const [start,step]=pick([[0,10],[0,100],[100*R(1,8),10],[0,5],[0,2],[0,20]]);const k=R(1,9),v=start+k*step;
-  return num('What number is the arrow pointing to?',v,{vis:nline(start,step,k),why:`The line goes from ${start} to ${start+10*step} in 10 jumps, so each jump is worth ${step}. The arrow is ${k} jumps along: ${v}.`})});
-
-/* ADD & SUBTRACT */
-function mental(sub){const place=pick([1,10,100]),dd=R(1,9),d=dd*place;const a=sub?R(100+d,999):R(100,999-d);const ans=sub?a-d:a+d;
-  const pn={1:'ones',10:'tens',100:'hundreds'}[place],next={1:'ten',10:'hundred'}[place],dig=Math.floor(a/place)%10;
-  let ex='';if(!sub&&place<100&&dig+dd>=10)ex=` There are more than 9 ${pn}, so exchange 10 ${pn} for 1 ${next}.`;if(sub&&place<100&&dig<dd)ex=` There are not enough ${pn}, so exchange 1 ${next} for 10 ${pn}.`;
-  return num(big(`${a} ${sub?'−':'+'} ${d} = ${BL}`),ans,{why:`${sub?'Take away':'Add'} ${dd} ${pn}.${ex} ${a} ${sub?'−':'+'} ${d} = ${ans}.`})}
-skill('addm','add','Adding in your head','345 + 30',()=>mental(false));
-skill('subm','add','Subtracting in your head','672 − 400',()=>mental(true));
-const PN=['ones','tens','hundreds'],P1=['one','ten','hundred'];
-const digs=n=>[n%10,Math.floor(n/10)%10,Math.floor(n/100)];
-skill('cola','add','Column addition','345 + 278 written in columns',()=>{const a=R(100,899),b=Math.random()<.3?R(10,99):R(100,999-a);const A=digs(a),B=digs(b);let c=0,out=[];
-  for(let i=0;i<3;i++){const t=A[i]+B[i]+c;if(i===2&&t===0)break;out.push(`${cap(PN[i])}: ${A[i]} + ${B[i]}${c?' + 1':''} = ${t}${t>=10&&i<2?` → write ${t%10}, carry 1`:''}`);c=t>=10?1:0}
-  return num('Work out the answer. Start with the ones.',a+b,{vis:colVis(a,b,'+'),why:out.join('<br>')})});
-skill('cols','add','Column subtraction','632 − 257 written in columns',()=>{let a;do{a=R(200,999)}while(digs(a)[1]===0);const b=R(100,a-50);const A=digs(a),B=digs(b);let out=[];
-  for(let i=0;i<3;i++){if(i===2&&A[2]-B[2]===0&&B[2]===0)break;if(A[i]<B[i]){out.push(`${cap(PN[i])}: ${A[i]} is less than ${B[i]}, so exchange 1 ${P1[i+1]} for 10 ${PN[i]}. ${A[i]+10} − ${B[i]} = ${A[i]+10-B[i]}`);A[i+1]--}else out.push(`${cap(PN[i])}: ${A[i]} − ${B[i]} = ${A[i]-B[i]}`)}
-  return num('Work out the answer. Start with the ones.',a-b,{vis:colVis(a,b,'−'),why:out.join('<br>')+`<br>Check: ${a-b} + ${b} = ${a}`})});
-skill('missing','add','Missing numbers','? + 245 = 500',()=>{const f=R(0,3);
-  if(f<2){const c=Math.random()<.5?R(2,9)*100:R(200,999),a=R(50,c-50),b=c-a;
-    return f===0?num(big(`${BL} + ${b} = ${c}`),a,{why:`Use the inverse: ${c} − ${b} = ${a}.`}):num(big(`${a} + ${BL} = ${c}`),b,{why:`Use the inverse: ${c} − ${a} = ${b}.`})}
-  const a=R(200,999),b=R(20,a-100),c=a-b;
-  return f===2?num(big(`${a} − ${BL} = ${c}`),b,{why:`${a} − ${c} = ${b}.`}):num(big(`${BL} − ${b} = ${c}`),a,{why:`Use the inverse: ${c} + ${b} = ${a}.`})});
-skill('estimate','add','Estimating','398 + 211 is about…',()=>{const sub=Math.random()<.4;let a,b;if(sub){a=R(400,999);b=R(110,a-150)}else{a=R(110,600);b=R(110,899-a)}
-  const r=x=>Math.round(x/100)*100,est=sub?r(a)-r(b):r(a)+r(b);
-  return mc(`Which is the <b>best estimate</b> for this?<br>${big(`${a} ${sub?'−':'+'} ${b}`)}`,est,[est+100,est-100,est+200,est-200].filter(x=>x>0),{why:`Round each number to the nearest hundred: ${a} is about ${r(a)} and ${b} is about ${r(b)}. ${r(a)} ${sub?'−':'+'} ${r(b)} = ${est}.`})});
-skill('addword','add','Word problems','Stickers, pages and points',()=>{const n=nm();return alt(
-  ()=>{const a=R(120,480),b=R(110,480);return num(`A school has <b>${a}</b> children in the infants and <b>${b}</b> in the juniors. How many children are there altogether?`,a+b,{post:'children',why:`Add: ${a} + ${b} = ${a+b}.`})},
-  ()=>{const a=R(150,600),b=R(30,a-40);return num(`${n} had <b>${a}</b> stickers and gave away <b>${b}</b>. How many stickers are left?`,a-b,{post:'stickers',why:`Subtract: ${a} − ${b} = ${a-b}.`})},
-  ()=>{const a=R(180,400),b=R(40,a-30);return num(`A book has <b>${a}</b> pages. ${n} has read <b>${b}</b> pages. How many pages are left to read?`,a-b,{post:'pages',why:`${a} − ${b} = ${a-b}.`})},
-  ()=>{const a=R(200,700),b=R(30,250);return num(`There were <b>${a}</b> people at the fair. <b>${b}</b> more people arrived. How many people are there now?`,a+b,{post:'people',why:`${a} + ${b} = ${a+b}.`})},
-  ()=>{const a=R(300,900),b=R(100,a-50);return num(`${n} scored <b>${a}</b> points in a game. Their friend scored <b>${b}</b> points. How many more points did ${n} score?`,a-b,{post:'points',why:`Find the difference: ${a} − ${b} = ${a-b}.`})})});
-
-/* MULTIPLY & DIVIDE */
-function tableQ(n){const a=R(1,12),p=a*n,f=R(0,3);const why=`Count in ${n}s: ${range(1,a).map(i=>i*n).join(', ')}. So ${a} × ${n} = ${p}.`;
-  if(f===0)return num(big(`${a} × ${n} = ${BL}`),p,{why});if(f===1)return num(big(`${n} × ${a} = ${BL}`),p,{why});
-  if(f===2)return num(big(`${p} ÷ ${n} = ${BL}`),a,{why:`${a} × ${n} = ${p}, so ${p} ÷ ${n} = ${a}.`});
-  return num(big(`${BL} × ${n} = ${p}`),a,{why:`${a} × ${n} = ${p}.`})}
-skill('t3','mul','3 times table','7 × 3, 24 ÷ 3',()=>tableQ(3));
-skill('t4','mul','4 times table','6 × 4, 32 ÷ 4',()=>tableQ(4));
-skill('t8','mul','8 times table','9 × 8, 56 ÷ 8',()=>tableQ(8));
-skill('tmix','mul','Mixed tables','2, 3, 4, 5, 8 and 10 times tables',()=>tableQ(pick([2,3,4,5,8,10])));
-skill('derived','mul','Using facts you know','3 × 4 = 12, so 30 × 4 = ?',()=>{const b=pick([2,3,4,5,8]),a=R(2,9),p=a*b;return alt(
-  ()=>num(`${a} × ${b} = ${p}<br>So what is this?<br>${big(`${a*10} × ${b} = ${BL}`)}`,p*10,{why:`${a*10} is 10 times bigger than ${a}, so the answer is 10 times bigger: ${p} × 10 = ${p*10}.`}),
-  ()=>num(`${a} × ${b} = ${p}<br>So what is this?<br>${big(`${p*10} ÷ ${b} = ${BL}`)}`,a*10,{why:`${p} ÷ ${b} = ${a}, so ${p*10} ÷ ${b} is 10 times bigger: ${a*10}.`}),
-  ()=>num(`${p} ÷ ${b} = ${a}<br>So what is this?<br>${big(`${b} × ${a*10} = ${BL}`)}`,p*10,{why:`${b} × ${a} = ${p}, so ${b} × ${a*10} = ${p*10}.`}))});
-skill('mul2','mul','2-digit × 1-digit','23 × 4',()=>{const b=pick([2,3,4,5,8]),a=R(12,b===8?25:45),t=Math.floor(a/10)*10,o=a%10;
-  return num(big(`${a} × ${b} = ${BL}`),a*b,{why:`Split ${a} into ${t} and ${o}.<br>${t} × ${b} = ${t*b}<br>${o} × ${b} = ${o*b}<br>${t*b} + ${o*b} = ${a*b}`})});
-skill('div2','mul','2-digit ÷ 1-digit','96 ÷ 3',()=>{const b=pick([2,3,4,5,8]),q=R(11,Math.floor(99/b)),a=q*b,t=Math.floor(q/10)*10;
-  return num(big(`${a} ÷ ${b} = ${BL}`),q,{why:`Split ${a} into ${t*b} and ${a-t*b}.<br>${t*b} ÷ ${b} = ${t}<br>${a-t*b} ÷ ${b} = ${q-t}<br>${t} + ${q-t} = ${q}`})});
-skill('mulword','mul','Word problems','Boxes of eggs, teams and outfits',()=>{const n=nm(),b=pick([2,3,4,5,8,10]),a=R(2,12);return alt(
-  ()=>num(`There are <b>${a}</b> boxes. Each box has <b>${b}</b> eggs. How many eggs are there altogether?`,a*b,{post:'eggs',why:`${a} groups of ${b}: ${a} × ${b} = ${a*b}.`}),
-  ()=>num(`<b>${a*b}</b> sweets are shared equally between <b>${b}</b> friends. How many sweets does each friend get?`,a,{post:'sweets',why:`${a*b} ÷ ${b} = ${a}.`}),
-  ()=>num(`<b>${a*b}</b> children get into teams of <b>${b}</b>. How many teams are there?`,a,{post:'teams',why:`How many ${b}s make ${a*b}? ${a*b} ÷ ${b} = ${a}.`}),
-  ()=>{const s=R(2,9),k=pick([2,3,4,5]);return num(`A blue ribbon is <b>${s} cm</b> long. A red ribbon is <b>${k} times</b> as long. How long is the red ribbon?`,s*k,{post:'cm',why:`${k} times as long means ${s} × ${k} = ${s*k}.`})},
-  ()=>{const t=R(2,5),k=R(2,5);return num(`${n} has <b>${t}</b> T-shirts and <b>${k}</b> pairs of shorts. How many different outfits can ${n} make?`,t*k,{post:'outfits',why:`Each T-shirt goes with ${k} pairs of shorts: ${t} × ${k} = ${t*k}.`})},
-  ()=>{const c=pick([2,3,4,5]);return num(`Cinema tickets cost <b>£${c}</b> each. How much do <b>${a}</b> tickets cost?`,a*c,{pre:'£',why:`${a} × £${c} = £${a*c}.`})})});
-
-/* FRACTIONS */
-skill('fshade','frac','What fraction is shaded?','Circles and bars cut into equal parts',()=>{const d=R(2,10),k=R(1,d-1);const wr=[fr(d-k,d),fr(k,d+1),fr(k,d-k),fr(d,k)].filter((x,i)=>!(i===2&&d-k===k));
-  return mc('What fraction of the shape is shaded?',fr(k,d),wr,{vis:fshape(k,d,Math.random()<.5?'bar':'circle'),why:`There are ${d} equal parts and ${k} ${k>1?'are':'is'} shaded, so ${fr(k,d)} is shaded.`})});
-skill('tenths','frac','Tenths','Count in tenths, find 1/10 of 70',()=>alt(
-  ()=>{const s=R(1,6);const seq=range(s,s+3);const m=R(1,3);return num(`Count in tenths. What is the missing numerator?<br>${big(seq.map((x,i)=>i===m?fr(BL,10):fr(x,10)).join(' , '))}`,seq[m],{why:`Each step adds ${fr(1,10)}.`})},
-  ()=>{const t=R(1,9)*10;return num(`What is ${fr(1,10)} of ${big(t)}?`,t/10,{why:`Divide by 10: ${t} ÷ 10 = ${t/10}.`})},
-  ()=>{const k=R(1,9);return num(`The line goes from 0 to 1 in tenths. The arrow points to ${fr(BL,10)}. What is the missing number?`,k,{vis:nline(0,1,k,i=>i===0?0:i===10?1:null),why:`The line is cut into 10 equal jumps. The arrow is ${k} jumps along, so it shows ${fr(k,10)}.`})},
-  ()=>{const k=R(1,9);return num(`How many tenths do you need to add to ${fr(k,10)} to make one whole?`,10-k,{why:`One whole is ${fr(10,10)}. ${10-k} + ${k} = 10.`})}));
-skill('fof','frac','Fractions of amounts','¼ of 20, ¾ of 12',()=>{const d=pick([2,3,4,5,8,10]),m=R(2,10),n=d*m,k=Math.random()<.5?1:R(1,d-1);
-  return num(`What is ${fr(k,d)} of ${big(n)}?`,k*m,{why:`Divide ${n} into ${d} equal groups: ${n} ÷ ${d} = ${m}. That is ${fr(1,d)}.${k>1?` For ${fr(k,d)}, take ${k} groups: ${m} × ${k} = ${k*m}.`:''}`})});
-skill('fequiv','frac','Equivalent fractions','½ = ?/8',()=>{const [a,b]=pick([[1,2],[1,3],[2,3],[1,4],[3,4],[1,5],[2,5]]),m=R(2,Math.floor(12/b)),d=b*m;
-  return num(`Fill in the missing number.<br>${big(`${fr(a,b)} = ${fr(BL,d)}`)}`,a*m,{vis:fbars(a,b,d),why:`The denominator was multiplied by ${m} (${b} × ${m} = ${d}), so multiply the numerator by ${m} too: ${a} × ${m} = ${a*m}.`})});
-skill('fcomp','frac','Comparing fractions','Which is bigger, ⅓ or ⅕?',()=>alt(
-  ()=>{let [x,y]=shuffle(range(2,10)).slice(0,2);const bigger=Math.random()<.5;const ans=bigger?Math.min(x,y):Math.max(x,y);
-    return mc(`Which fraction is <b>${bigger?'bigger':'smaller'}</b>?`,fr(1,ans),[fr(1,x),fr(1,y)],{keep:true,why:`When the numerator is 1, the bigger the denominator, the smaller each part. ${fr(1,Math.min(x,y))} is bigger than ${fr(1,Math.max(x,y))}.`})},
-  ()=>{const d=R(4,12);let [x,y]=shuffle(range(1,d-1)).slice(0,2);const bigger=Math.random()<.5;const ans=bigger?Math.max(x,y):Math.min(x,y);
-    return mc(`Which fraction is <b>${bigger?'bigger':'smaller'}</b>?`,fr(ans,d),[fr(x,d),fr(y,d)],{keep:true,why:`The parts are the same size (${d}ths), so compare the numerators: ${ans} ${bigger?'is more than':'is less than'} ${ans===x?y:x}.`})},
-  ()=>{const ds=shuffle(range(2,10)).slice(0,3);const ans=Math.max(...ds);return mc('Which fraction is the <b>smallest</b>?',fr(1,ans),ds.map(d=>fr(1,d)),{why:`${fr(1,ans)} has the biggest denominator, so its parts are the smallest.`})}));
-skill('fadd','frac','Adding & subtracting fractions','2/7 + 3/7',()=>{const d=R(3,12),sub=Math.random()<.4;let a,b;
-  if(sub){a=R(2,d);b=R(1,a-1)}else{a=R(1,d-1);b=R(1,d-a)}const ans=sub?a-b:a+b;
-  return num(`Fill in the missing numerator.<br>${big(`${fr(a,d)} ${sub?'−':'+'} ${fr(b,d)} = ${fr(BL,d)}`)}`,ans,{why:`The denominators are the same, so just ${sub?'subtract':'add'} the numerators: ${a} ${sub?'−':'+'} ${b} = ${ans}.${ans===d?` ${fr(d,d)} is one whole!`:''}`})});
-
-/* MEASUREMENT */
-skill('convert','meas','Converting units','3 m = ? cm, 2 kg = ? g',()=>{const a=R(1,9);return alt(
-  ()=>num(big(`${a} m = ${BL} cm`),a*100,{why:`1 m = 100 cm, so ${a} m = ${a} × 100 = ${a*100} cm.`}),
-  ()=>num(big(`${a*100} cm = ${BL} m`),a,{why:`100 cm = 1 m, so ${a*100} cm = ${a} m.`}),
-  ()=>{const b=R(1,19)*5;return num(big(`${a} m ${b} cm = ${BL} cm`),a*100+b,{why:`${a} m = ${a*100} cm. ${a*100} + ${b} = ${a*100+b} cm.`})},
-  ()=>{const c=R(1,15);return num(big(`${c} cm = ${BL} mm`),c*10,{why:`1 cm = 10 mm, so ${c} cm = ${c*10} mm.`})},
-  ()=>{const c=R(1,15);return num(big(`${c*10} mm = ${BL} cm`),c,{why:`10 mm = 1 cm, so ${c*10} mm = ${c} cm.`})},
-  ()=>num(big(`${a} kg = ${BL} g`),a*1000,{why:`1 kg = 1000 g, so ${a} kg = ${a*1000} g.`}),
-  ()=>num(big(`${a} l = ${BL} ml`),a*1000,{why:`1 litre = 1000 ml, so ${a} l = ${a*1000} ml.`}),
-  ()=>{const [q,u,v]=pick([['half a metre','cm',50],['half a kilogram','g',500],['half a litre','ml',500],['a quarter of a metre','cm',25]]);return num(`How many <b>${u}</b> are in <b>${q}</b>?`,v,{post:u,why:`${cap(q)} = ${v} ${u}.`})})});
-skill('mcalc','meas','Measure problems','Ribbons, flour and jugs',()=>{const n=nm();return alt(
-  ()=>{const a=R(25,95),b=R(15,95);return num(`A red ribbon is <b>${a} cm</b> long and a blue ribbon is <b>${b} cm</b> long. How long are they altogether?`,a+b,{post:'cm',why:`${a} + ${b} = ${a+b} cm.`})},
-  ()=>{const a=R(60,99),b=R(12,a-10);return num(`A plank of wood is <b>${a} cm</b> long. <b>${b} cm</b> is cut off. How long is it now?`,a-b,{post:'cm',why:`${a} − ${b} = ${a-b} cm.`})},
-  ()=>{const a=R(5,10)*100,b=R(2,a/50-2)*50;return num(`A bag of flour weighs <b>${a} g</b>. ${n} uses <b>${b} g</b> to bake a cake. How much flour is left?`,a-b,{post:'g',why:`${a} − ${b} = ${a-b} g.`})},
-  ()=>{const a=R(10,60)*10,b=R(10,35)*10;return num(`A melon weighs <b>${a} g</b> and a pineapple weighs <b>${b} g</b>. What is their total mass?`,a+b,{post:'g',why:`${a} + ${b} = ${a+b} g.`})},
-  ()=>{const a=R(6,20)*50,b=R(2,a/50-1)*50;return num(`A jug holds <b>${a} ml</b> of juice. ${n} pours out <b>${b} ml</b>. How much juice is left in the jug?`,a-b,{post:'ml',why:`${a} − ${b} = ${a-b} ml.`})})});
-skill('mcomp','meas','Compare & estimate','Which is heavier: 1 kg or 900 g?',()=>alt(
-  ()=>{const [u1,u2,f,word]=pick([['m','cm',100,'longer'],['kg','g',1000,'heavier'],['l','ml',1000,'more']]);const a=R(1,3);const off=f===100?R(1,4)*10:R(1,4)*100;const b=a*f+(Math.random()<.5?off:-off);
-    const A=`${a} ${u1}`,B=`${b} ${u2}`,ans=b>a*f?B:A;const q=word==='more'?'Which holds <b>more</b>?':`Which is <b>${word}</b>?`;
-    return mc(q,ans,[A,B],{keep:true,why:`${a} ${u1} = ${a*f} ${u2}. ${Math.max(a*f,b)} ${u2} is more than ${Math.min(a*f,b)} ${u2}.`})},
-  ()=>{const [thing,ans,wr]=pick([['the height of a classroom door','2 m',['2 cm','20 m','2 mm']],['the length of a pencil','15 cm',['15 m','15 mm','150 m']],['the length of an ant','5 mm',['5 cm','5 m','50 cm']],['the mass of an apple','150 g',['150 kg','15 kg','1 g']],['the mass of a bag of sugar','1 kg',['1 g','100 kg','10 g']],['the amount in a cup of tea','250 ml',['250 l','2 ml','25 l']],['the amount in a full bath','100 l',['100 ml','1 l','10 ml']],['the length of a football pitch','100 m',['100 cm','10 cm','1000 mm']]]);
-    return mc(`What is the best estimate for <b>${thing}</b>?`,ans,wr,{why:`${cap(thing)} is about ${ans}.`})}));
-skill('ruler','meas','Measuring with a ruler','How long is the pencil?',()=>{const whole=Math.random()<.55;
-  if(whole){const s=Math.random()<.3?R(1,3):0,L=R(3,13-s);return num(`How long is the pencil in <b>centimetres</b>?`,L,{post:'cm',vis:rulerSvg(s,L),why:s?`The pencil starts at ${s} and ends at ${s+L}. ${s+L} − ${s} = ${L} cm.`:`The pencil starts at 0 and ends at ${L}, so it is ${L} cm long.`})}
-  const mm=R(30,135);if(mm%10===0)return num(`How long is the pencil in <b>millimetres</b>?`,mm,{post:'mm',vis:rulerSvg(0,mm/10),why:`It ends exactly at ${mm/10} cm. ${mm/10} cm = ${mm} mm.`});
-  return num(`How long is the pencil in <b>millimetres</b>?`,mm,{post:'mm',vis:rulerSvg(0,mm/10),why:`It ends ${mm%10} small marks after ${Math.floor(mm/10)} cm. ${Math.floor(mm/10)} cm = ${Math.floor(mm/10)*10} mm, plus ${mm%10} mm = ${mm} mm.`})});
-skill('perim','meas','Perimeter','Add up all the sides',()=>alt(
-  ()=>{const w=R(3,12),h=R(2,9),sc=Math.min(300/w,150/h),W=w*sc,H=h*sc,x=(420-W)/2-20,y=34;
-    const s=`<rect x="${f1(x)}" y="${y}" width="${f1(W)}" height="${f1(H)}" class="shp"/><text x="${f1(x+W/2)}" y="${y-10}" text-anchor="middle" font-size="18">${w} cm</text><text x="${f1(x+W+10)}" y="${f1(y+H/2+6)}" font-size="18">${h} cm</text>`;
-    return num('This is a rectangle. What is its <b>perimeter</b>?',2*(w+h),{post:'cm',vis:svg(440,H+56,s,'rectangle'),why:`Opposite sides of a rectangle are equal. ${w} + ${h} + ${w} + ${h} = ${2*(w+h)} cm.`})},
-  ()=>{const W=R(4,8),H=R(3,6),cut=Math.random()<.7,cw=R(1,W-2),ch=R(1,H-2),c=30,o=c;let s='';
-    for(let i=0;i<=W+2;i++)s+=`<line x1="${i*c}" y1="0" x2="${i*c}" y2="${(H+2)*c}" class="grid"/>`;for(let j=0;j<=H+2;j++)s+=`<line x1="0" y1="${j*c}" x2="${(W+2)*c}" y2="${j*c}" class="grid"/>`;
-    const pts=cut?[[0,0],[W-cw,0],[W-cw,ch],[W,ch],[W,H],[0,H]]:[[0,0],[W,0],[W,H],[0,H]];
-    s+=`<polygon points="${pts.map(([a,b])=>`${o+a*c},${o+b*c}`).join(' ')}" class="shp"/>`;
-    return num('Each square is 1 cm long. What is the <b>perimeter</b> of the shape?',2*(W+H),{post:'cm',vis:svg((W+2)*c,(H+2)*c,s,'shape on squared paper'),why:`Count every edge around the outside of the shape. It comes to ${2*(W+H)} cm.`})},
-  ()=>{let a=R(4,12),b=R(4,12),cc=R(Math.abs(a-b)+2,Math.min(a+b-2,15));const s=`<polygon points="60,190 380,190 250,42" class="shp"/><text x="220" y="218" text-anchor="middle" font-size="18">${cc} cm</text><text x="138" y="108" text-anchor="end" font-size="18">${a} cm</text><text x="328" y="108" font-size="18">${b} cm</text>`;
-    return num('What is the <b>perimeter</b> of this triangle? <i>(Not drawn to scale.)</i>',a+b+cc,{post:'cm',vis:svg(440,230,s,'triangle'),why:`${a} + ${b} + ${cc} = ${a+b+cc} cm.`})},
-  ()=>{const n=pick([5,6,8]),len=R(2,9),nm2={5:'pentagon',6:'hexagon',8:'octagon'}[n];const s=`<polygon points="${poly(n,130,110,90,-90)}" class="shp"/>`;
-    return num(`This is a regular ${nm2}. Every side is <b>${len} cm</b>. What is its perimeter?`,n*len,{post:'cm',vis:svg(260,220,s,nm2),why:`A ${nm2} has ${n} equal sides: ${n} × ${len} = ${n*len} cm.`})},
-  ()=>{const l=R(2,12);return num(`A square has a perimeter of <b>${4*l} cm</b>. How long is each side?`,l,{post:'cm',why:`A square has 4 equal sides: ${4*l} ÷ 4 = ${l} cm.`})}));
-
-/* MONEY & TIME */
-skill('coins','mt','Counting coins','How much money is here?',()=>{const k=R(3,5),list=Array.from({length:k},()=>pick([1,2,5,10,20,50,100,200])).sort((a,b)=>b-a),t=list.reduce((a,b)=>a+b,0);
-  const why=`${list.map(c=>COINS[c].l).join(' + ')} = ${fmt(t)}`;
-  if(t<100)return num('How much money is here?',t,{post:'p',vis:coinsSvg(list),why});
-  return mc('How much money is here?',fmt(t),[fmt(t+10),fmt(t-10),fmt(t+100),fmt(t-list[list.length-1]),fmt(t+5)].filter(x=>!x.includes('-')),{vis:coinsSvg(list),why:why+'. Remember £1 = 100p.'})});
-const ITEMS=['comic','pencil case','yo-yo','book','sandwich','toy car','skipping rope','kite','ball'];
-skill('money','mt','Money problems','Totals, change and pounds into pence',()=>{const n=nm();return alt(
-  ()=>{const [i1,i2]=shuffle(ITEMS).slice(0,2),a=R(7,79)*5,b=R(7,79)*5,t=a+b;return mc(`${n} buys a ${i1} for <b>${fmt(a)}</b> and a ${i2} for <b>${fmt(b)}</b>. How much is that altogether?`,fmt(t),[fmt(t+10),fmt(t-10),fmt(t+100),fmt(Math.abs(t-100))],{why:`${fmt(a)} + ${fmt(b)} = ${fmt(t)}.`})},
-  ()=>{const pay=pick([100,200,500,1000]),cost=R(1,pay/5-1)*5,ch=pay-cost;return mc(`A ${pick(ITEMS)} costs <b>${fmt(cost)}</b>. ${n} pays with <b>${fmt(pay)}</b>. How much change does ${n} get?`,fmt(ch),[fmt(ch+10),fmt(ch+5),ch>10?fmt(ch-10):fmt(ch+20),fmt(ch+100)],{why:`${fmt(pay)} − ${fmt(cost)} = ${fmt(ch)}. Check by counting on from ${fmt(cost)}.`})},
-  ()=>{const P=R(101,999);return num(`How many pence is <b>${fmt(P)}</b>?`,P,{post:'p',why:`£1 = 100p, so ${fmt(P)} = ${P}p.`})},
-  ()=>{const P=R(101,999),s=String(P);return mc(`How do you write <b>${P}p</b> in pounds?`,fmt(P),[`£${(P/10).toFixed(2)}`,`£${s[0]}.${s[2]}${s[1]}`,`£${P}.00`],{why:`100p = £1, so ${P}p = £${Math.floor(P/100)} and ${P%100}p = ${fmt(P)}.`})})});
-function tw(h,m){const nx=h%12+1;if(m===0)return `${h} o'clock`;if(m===15)return `quarter past ${h}`;if(m===30)return `half past ${h}`;if(m===45)return `quarter to ${nx}`;if(m<30)return `${m} minutes past ${h}`;return `${60-m} minutes to ${nx}`}
-const dig=(H,M)=>`${H}:${pad(M)}`;
-skill('clock','mt','Telling the time','Read the clock, even with Roman numerals',()=>{const roman=Math.random()<.25,h=R(1,12),exact=Math.random()<.2,m=exact?R(1,59):R(0,11)*5;
-  const vis=clockSvg(h,m,roman),hn=h%12+1,hp=(h+10)%12+1;
-  const why=`The short hand shows the hour. It has ${m===0?'reached':'gone past'} ${roman?ROM[h%12]+' ('+h+')':h}. The long hand shows the minutes: count round in 5s from the top to get ${m} minutes.`;
-  if(!exact&&Math.random()<.4)return mc('What time does the clock show?',tw(h,m),[tw(hn,m),tw(hp,m),tw(h,(60-m)%60),tw(h,(m+15)%60)],{vis,why});
-  const sw=Math.round(m/5)%12||12;
-  return mc('What time does the clock show?',dig(h,m),[dig(hn,m),dig(hp,m),dig(h,(60-m)%60),dig(sw,(h*5)%60),dig(h,(m+5)%60)],{vis,why})});
-skill('h24','mt','12- and 24-hour clock','What is 3:00 pm in 24-hour time?',()=>alt(
-  ()=>{const h=R(1,12),m=R(0,11)*5,pm=Math.random()<.6,H=pm?(h===12?12:h+12):(h===12?0:h),O=pm?(h===12?0:h):(h===12?12:h+12);
-    return mc(`This clock shows a time in the <b>${pm?'afternoon':'morning'}</b>. What is the time on a 24-hour clock?`,`${pad(H)}:${pad(m)}`,[`${pad(O)}:${pad(m)}`,`${pad((H+2)%24)}:${pad(m)}`,`${pad((H+10)%24)}:${pad(m)}`],{vis:clockSvg(h,m,false),why:pm?`For afternoon times, add 12 to the hour: ${h} + 12 = ${H}.`:`Morning times keep the same hour (12 midnight becomes 00): ${pad(H)}:${pad(m)}.`})},
-  ()=>{const H=R(13,23),m=R(0,11)*5;return mc(`What is <b>${pad(H)}:${pad(m)}</b> in 12-hour time?`,`${H-12}:${pad(m)} pm`,[`${H-12}:${pad(m)} am`,`${H-10}:${pad(m)} pm`,`${H-11}:${pad(m)} pm`],{why:`Take away 12 from the hour: ${H} − 12 = ${H-12}. It is after midday, so it is pm.`})},
-  ()=>{const [act,t,ap]=pick([['wakes up','7:15','am'],['eats dinner','6:00','pm'],['goes to bed','8:00','pm'],['starts school','8:45','am'],['goes home from school','3:15','pm'],['eats breakfast','7:30','am'],['has a swimming lesson after school','4:30','pm']]);
-    return mc(`${nm()} ${act} at <b>${t}</b>. Is that <b>am</b> or <b>pm</b>?`,ap,['am','pm'],{keep:true,why:`am is from midnight to midday (morning). pm is from midday to midnight (afternoon and evening).`})}));
-const MONTHS=[['January',31],['February',28],['March',31],['April',30],['May',31],['June',30],['July',31],['August',31],['September',30],['October',31],['November',30],['December',31]];
-skill('tfacts','mt','Time facts & durations','Days in April, minutes in an hour',()=>alt(
-  ()=>{const [q,a]=pick([['seconds are in 1 minute',60],['minutes are in 1 hour',60],['hours are in 1 day',24],['days are in 1 week',7],['days are in a year',365],['days are in a leap year',366],['months are in a year',12],['minutes are in half an hour',30],['minutes are in a quarter of an hour',15]]);return num(`How many ${q}?`,a,{why:`There are ${a} ${q}.`})},
-  ()=>{const [mo,d]=pick(MONTHS);return num(`How many days are in <b>${mo}</b>${mo==='February'?' (not in a leap year)':''}?`,d,{post:'days',why:`${mo} has ${d} days. “30 days has September, April, June and November…”`})},
-  ()=>{const k=R(2,5);return alt(()=>num(`How many minutes are in <b>${k} hours</b>?`,60*k,{post:'minutes',why:`${k} × 60 = ${60*k}.`}),()=>num(`How many seconds are in <b>${k} minutes</b>?`,60*k,{post:'seconds',why:`${k} × 60 = ${60*k}.`}),()=>num(`How many days are in <b>${k} weeks</b>?`,7*k,{post:'days',why:`${k} × 7 = ${7*k}.`}))},
-  ()=>{const h=R(1,10),m=R(0,11)*5,d=pick([15,20,25,30,35,40,45,50]),m2=(m+d)%60,h2=h+Math.floor((m+d)/60);const n=nm();
-    return num(`${n}'s ${pick(['swimming lesson','film','football match','piano lesson'])} starts at <b>${dig(h,m)}</b> and finishes at <b>${dig(h2,m2)}</b>. How many minutes long is it?`,d,{post:'minutes',why:`Count on from ${dig(h,m)} to ${dig(h2,m2)}: that is ${d} minutes.`})},
-  ()=>{const h=R(1,10),m=R(0,11)*5,d=pick([15,20,25,30,35,40,45]),m2=(m+d)%60,h2=h+Math.floor((m+d)/60);
-    return mc(`A TV show starts at <b>${dig(h,m)}</b> and lasts <b>${d} minutes</b>. What time does it finish?`,dig(h2,m2),[dig(h,m2),dig(h2+1,m2),dig(h2,(m2+10)%60)],{why:`Count on ${d} minutes from ${dig(h,m)}: ${dig(h2,m2)}.`})}));
-
-/* GEOMETRY */
-const SHAPES=[['triangle',3],['square',4],['rectangle',4],['pentagon',5],['hexagon',6],['heptagon',7],['octagon',8],['circle',0],['semi-circle',-1]];
-function shapeSvg(name,n){let s;const jit=n>=5&&Math.random()<.5?range(1,n).map(()=>.72+Math.random()*.28):null;
-  if(name==='circle')s=`<circle cx="130" cy="110" r="85" class="shp"/>`;
-  else if(name==='semi-circle')s=`<path d="M40 150 A90 90 0 0 1 220 150 Z" class="shp"/>`;
-  else if(name==='rectangle'){const r=R(-20,20);s=`<rect x="40" y="60" width="180" height="100" class="shp" transform="rotate(${r} 130 110)"/>`}
-  else if(name==='triangle'){s=`<polygon points="${R(20,90)},${R(170,195)} ${R(170,240)},${R(160,195)} ${R(60,200)},${R(20,60)}" class="shp"/>`}
-  else s=`<polygon points="${poly(n,130,110,90,R(0,359),jit)}" class="shp"/>`;
-  return svg(260,220,s,'a 2-D shape')}
-skill('shape2d','geo','2-D shapes','Name shapes, count sides and vertices',()=>{const [name,n]=pick(SHAPES);return alt(
-  ()=>mc('What is the name of this shape?',cap(name),shuffle(SHAPES.map(s=>cap(s[0])).filter(s=>s!==cap(name))),{vis:shapeSvg(name,n),why:n>0?`It has ${n} straight sides, so it is a ${name}.`:name==='circle'?'It is perfectly round with one curved side.':'It is half a circle: one curved side and one straight side.'}),
-  ()=>{if(n<=0)return num('How many sides does a <b>hexagon</b> have?',6,{why:'Hex means six. A hexagon has 6 sides.'});return num(`How many <b>${Math.random()<.5?'sides':'vertices (corners)'}</b> does this ${name} have?`,n,{vis:shapeSvg(name,n),why:`A ${name} has ${n} sides and ${n} vertices.`})},
-  ()=>{const [q,a]=pick([['How many right angles does a rectangle have?',4],['How many right angles does a square have?',4],['How many sides does an octagon have?',8],['How many sides does a pentagon have?',5],['How many vertices does a triangle have?',3]]);return num(q,a,{why:`The answer is ${a}.`})})});
-const S3=[['cube',6,12,8,'6 square faces'],['cuboid',6,12,8,'6 rectangular faces'],['square-based pyramid',5,8,5,'a square base and 4 triangular faces'],['triangular prism',5,9,6,'2 triangular faces and 3 rectangular faces'],['tetrahedron',4,6,4,'4 triangular faces']];
-const S3D=[['sphere','1 curved surface and no edges'],['cylinder','2 flat circle faces and 1 curved surface'],['cone','1 flat circle face, 1 curved surface and a point at the top']].concat(S3.map(s=>[s[0],s[4]]));
-skill('shape3d','geo','3-D shapes','Faces, edges and vertices',()=>alt(
-  ()=>{const [n,f,e,v]=pick(S3);const [w,a]=pick([['faces',f],['edges',e],['vertices (corners)',v]]);return num(`How many <b>${w}</b> does a <b>${n}</b> have?`,a,{why:`A ${n} has ${f} faces, ${e} edges and ${v} vertices.`})},
-  ()=>{const [n,d]=pick(S3D);return mc(`Which 3-D shape has <b>${d}</b>?`,cap(n),shuffle(S3D.map(s=>cap(s[0]))),{why:`A ${n} has ${d}.`})}));
-skill('angles','geo','Angles','Acute, right angle or obtuse?',()=>alt(
-  ()=>{const k=R(0,2),th=k===0?R(25,75):k===1?90:R(105,160),ans=['Acute','Right angle','Obtuse'][k];
-    return mc('Is this angle <b>acute</b>, a <b>right angle</b>, or <b>obtuse</b>?',ans,['Acute','Right angle','Obtuse'],{keep:true,vis:angleSvg(th,R(0,180)),why:k===0?'It is smaller than a right angle, so it is acute.':k===1?'It makes a perfect square corner, so it is a right angle.':'It is bigger than a right angle (but less than a straight line), so it is obtuse.'})},
-  ()=>{const [t,a]=pick([['quarter',1],['half',2],['three-quarter',3],['whole',4]]);return num(`How many right angles make a <b>${t} turn</b>?`,a,{why:`One right angle is a quarter turn, so a ${t} turn is ${a} right angle${a>1?'s':''}.`})}));
-const DIRS=['North','East','South','West'];
-skill('turns','geo','Turns & directions','Quarter turn clockwise from North',()=>{const d=R(0,3),[tn,k]=pick([['quarter',1],['half',2],['three-quarter',3]]),cw=Math.random()<.5,n=nm(),e=(d+(cw?k:-k)+8)%4;
-  return mc(`${n} is facing <b>${DIRS[d]}</b>. ${n} makes a <b>${tn} turn ${cw?'clockwise':'anticlockwise'}</b>. Which way is ${n} facing now?`,DIRS[e],DIRS,{keep:true,vis:compassSvg(DIRS[d]),why:`${cw?'Clockwise is the way clock hands move':'Anticlockwise is the opposite way to clock hands'}. A ${tn} turn moves ${k} step${k>1?'s':''} round the compass: ${DIRS[d]} → ${DIRS[e]}.`})});
-skill('lines','geo','Lines','Parallel, perpendicular, horizontal, vertical',()=>alt(
-  ()=>{const k=R(0,2),a=R(0,179);let s;
-    if(k===0){const r=a*Math.PI/180;s=seg(150+42*Math.sin(r),110+42*Math.cos(r),a,190)+seg(150-42*Math.sin(r),110-42*Math.cos(r),a,190)}
-    else if(k===1){const t=R(-50,50),r=a*Math.PI/180;s=seg(150,110,a,190)+seg(150+t*Math.cos(r),110-t*Math.sin(r),a+90,150)}
-    else{const b=a+R(25,60)*(Math.random()<.5?1:-1);s=seg(140,100,a,180)+seg(165,125,b,180)}
-    const ans=['Parallel','Perpendicular','Neither'][k];return mc('Are these lines <b>parallel</b>, <b>perpendicular</b>, or <b>neither</b>?',ans,['Parallel','Perpendicular','Neither'],{keep:true,vis:svg(300,220,s,'two lines'),why:k===0?'They go in exactly the same direction and would never meet.':k===1?'They meet at a right angle.':'They are not the same direction and do not meet at a right angle.'})},
-  ()=>{const k=R(0,2),a=k===0?0:k===1?90:pick([R(20,70),R(110,160)]);const ans=['Horizontal','Vertical','Diagonal'][k];
-    return mc('Is this line <b>horizontal</b>, <b>vertical</b> or <b>diagonal</b>?',ans,['Horizontal','Vertical','Diagonal'],{keep:true,vis:svg(300,220,seg(150,110,a,180),'a line'),why:k===0?'It goes straight across, like the horizon.':k===1?'It goes straight up and down.':'It slopes, so it is neither horizontal nor vertical.'})},
-  ()=>{const p=Math.random()<.5;return mc(p?'Lines that are always the same distance apart and never meet, like train tracks, are called…':'Two lines that meet at a right angle are called…',p?'Parallel':'Perpendicular',['Parallel','Perpendicular','Horizontal','Vertical'],{keep:true,why:p?'Parallel lines never meet.':'Perpendicular lines meet at a right angle.'})}));
-
-/* STATISTICS */
-const SETS=[['Favourite fruit','fruit',['Apples','Bananas','Grapes','Pears','Kiwis']],['Favourite ice cream','flavour',['Vanilla','Chocolate','Mint','Strawberry','Toffee']],['How Class 3 get to school','way to travel',['Walk','Car','Bus','Bike','Scooter']],['Favourite sport','sport',['Football','Netball','Swim','Tennis','Dance']],['Favourite colour','colour',['Red','Blue','Green','Yellow','Purple']]];
-function statSet(){const g=pick(SETS),n=Math.random()<.5?4:5;return {title:g[0],noun:g[1],cats:shuffle(g[2]).slice(0,n)}}
-function statQ(S,vals,vis,how){const n=S.cats.length,i=R(0,n-1);let j;do{j=R(0,n-1)}while(j===i);const a=S.cats[i],b=S.cats[j],va=vals[i],vb=vals[j],f=R(0,4);
-  if(f<=1)return num(`How many children chose <b>${a}</b>?`,va,{vis,why:how(i)});
-  if(f===2){const [x,y,vx,vy]=va>=vb?[a,b,va,vb]:[b,a,vb,va];return num(`How many <b>more</b> children chose <b>${x}</b> than <b>${y}</b>?`,vx-vy,{vis,why:`${x}: ${vx}. ${y}: ${vy}. ${vx} − ${vy} = ${vx-vy}.`})}
-  if(f===3)return num(`How many children chose <b>${a}</b> or <b>${b}</b> altogether?`,va+vb,{vis,why:`${a}: ${va}. ${b}: ${vb}. ${va} + ${vb} = ${va+vb}.`});
-  const most=Math.random()<.5,idx=vals.indexOf(most?Math.max(...vals):Math.min(...vals));
-  return mc(`Which ${S.noun} was chosen by the <b>${most?'most':'fewest'}</b> children?`,S.cats[idx],S.cats,{vis,why:`${S.cats[idx]} has the ${most?'biggest':'smallest'} number: ${vals[idx]}.`})}
-skill('bar','stat','Bar charts','Read the scale in 1s, 2s, 5s or 10s',()=>{const S=statSet(),step=pick([1,2,5,10]),vals=shuffle(range(1,10)).slice(0,S.cats.length).map(v=>v*step);
-  return statQ(S,vals,barSvg(S.cats,vals,step,S.title),i=>`Go to the top of the ${S.cats[i]} bar and read across to the scale. The scale goes up in ${step}s. It lines up with ${vals[i]}.`)});
-skill('picto','stat','Pictograms','One circle stands for 2, 4, 5 or 10',()=>{const S=statSet(),k=pick([2,4,5,10]),unit=k%2?k:k/2,max=k%2?6:12,vals=shuffle(range(1,max)).slice(0,S.cats.length).map(u=>u*unit);
-  return statQ(S,vals,pictoSvg(S.cats,vals,k,S.title),i=>{const w=Math.floor(vals[i]/k),h=vals[i]%k;return `Each circle is ${k}. ${S.cats[i]} has ${w} whole circle${w===1?'':'s'}${h?` and a half circle`:''}: ${w} × ${k} = ${w*k}${h?` and half of ${k} is ${k/2}, so ${w*k} + ${k/2} = ${vals[i]}`:''}.`})});
-skill('tally','stat','Tally charts','Count tally marks in fives',()=>{const S=statSet(),vals=shuffle(range(2,19)).slice(0,S.cats.length);
-  return statQ(S,vals,tallyTable(S.cats,vals,S.title),i=>{const g=Math.floor(vals[i]/5),r=vals[i]%5;return `Count the gates of 5 first: ${g} × 5 = ${g*5}${r?`, then ${r} more lines: ${g*5} + ${r} = ${vals[i]}`:''}.`})});
-
-const SKMAP=Object.fromEntries(SK.map(s=>[s.id,s]));
-
-/* ---------- state ---------- */
-const KEY='y3-maths-quest-v1',N=10;
-function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.best)return d}catch(e){}return {best:{},name:'',done:0,right:0}}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}}
-let store=load(),Q=null;
-const starsFor=s=>s>=10?3:s>=8?2:s>=5?1:0;
-const starIcon=on=>`<svg class="st${on?' on':''}" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17l-5.9 3.3 1.3-6.6L2.5 9.1l6.6-.8z"/></svg>`;
-const stars3=n=>[0,1,2].map(i=>starIcon(i<n)).join('');
-const totalStars=()=>SK.reduce((a,s)=>a+starsFor(store.best[s.id]||0),0);
-const app=document.getElementById('app');
-
-function header(){return `<header class="top"><div class="topin"><button class="brand" data-act="home" aria-label="Back to all topics"><span class="logo">3</span><span>Maths Quest</span></button><div class="score" title="Stars earned">${starIcon(true)} ${totalStars()} / ${SK.length*3}</div></div></header>`}
-
-function renderHome(){Q=null;
-  app.innerHTML=header()+`<main class="wrap">
-  <section class="hero"><div>
-    <h1 id="hello">Hello${store.name?', '+esc(store.name):''}! What shall we practise today?</h1>
-    <p>Pick a topic and answer 10 questions. Get 5 right for one star, 8 for two stars and all 10 for three stars.</p>
-    <label class="namebox" for="kidname">Your name <input id="kidname" maxlength="20" autocomplete="off" value="${esc(store.name)}"></label>
-  </div>
-  <button class="mixbig" data-act="mixall"><span class="mx-t">Mixed challenge</span><span class="mx-s">10 questions from every topic</span></button></section>
-  ${STRANDS.map(st=>{const sk=SK.filter(s=>s.strand===st.id),got=sk.reduce((a,s)=>a+starsFor(store.best[s.id]||0),0);
-    return `<section class="strand" style="--c:var(--c-${st.id})"><div class="shead"><span class="chip">${st.glyph}</span><h2>${st.name}</h2><span class="sst">${starIcon(got>0)} ${got}/${sk.length*3}</span><button class="mix" data-act="mix" data-st="${st.id}">Mix this topic</button></div>
-    <div class="tiles">${sk.map(s=>{const b=store.best[s.id];return `<button class="tile" data-act="skill" data-id="${s.id}"><span class="tname">${s.name}</span><span class="teg">${s.eg}</span><span class="tfoot"><span class="tstars">${stars3(starsFor(b||0))}</span>${b!=null?`<span class="tbest">Best ${b}/10</span>`:''}</span></button>`}).join('')}</div></section>`}).join('')}
-  <footer>Covers the Year 3 maths programme of study in the National Curriculum for England. New questions are made every time you play. Stars are saved in this browser on this device.</footer>
-  </main>`;
-  window.scrollTo(0,0)}
-
-function makeQs(ids){const qs=[],seen=new Set();let pool=[];
-  for(let i=0;i<N;i++){if(!pool.length)pool=shuffle(ids);const id=pool.pop();let q,t=0;do{q=SKMAP[id].gen();t++}while(seen.has(q.q+(q.vis||''))&&t<8);seen.add(q.q+(q.vis||''));q.skill=id;qs.push(q)}
-  return qs}
-function start(ids,title,single){Q={ids,title,single,qs:makeQs(ids),i:0,score:0,res:[],wrong:[],input:'',answered:false};renderQ()}
-
-function renderQ(){const q=Q.qs[Q.i],st=SKMAP[q.skill].strand;Q.input='';Q.answered=false;
-  const ans=q.type==='choice'
-    ?`<div class="choices">${q.choices.map((c,i)=>`<button class="choice" data-act="pick" data-i="${i}">${c}</button>`).join('')}</div><p class="hint">Tap your answer</p>`
-    :`<div class="numrow">${q.pre?`<span class="unit">${q.pre}</span>`:''}<output id="disp" class="disp empty" aria-live="polite"></output>${q.post?`<span class="unit">${q.post}</span>`:''}</div>
-      <div class="pad" id="pad">${[1,2,3,4,5,6,7,8,9].map(k=>`<button data-act="key" data-k="${k}">${k}</button>`).join('')}<button data-act="key" data-k="del" aria-label="Delete">⌫</button><button data-act="key" data-k="0">0</button><button data-act="key" data-k="ok" class="go">Check</button></div>`;
-  app.innerHTML=header()+`<main class="wrap quiz" style="--c:var(--c-${st})">
-    <div class="qbar"><button class="link" data-act="home">← All topics</button><span class="qtitle">${Q.title}</span></div>
-    <div class="prog" aria-hidden="true">${Q.qs.map((x,i)=>`<span class="${i<Q.i?(Q.res[i]?'ok':'no'):i===Q.i?'cur':''}"></span>`).join('')}</div>
-    <section class="qcard"><p class="qnum">Question ${Q.i+1} of ${N}${Q.single?'':' · '+SKMAP[q.skill].name}</p>
-      <div class="qtext">${q.q}</div>${q.vis?`<div class="qvis">${q.vis}</div>`:''}
-      <div class="answer">${ans}</div><div id="fb" class="fb" hidden></div></section></main>`;
-  window.scrollTo(0,0)}
-
-function updDisp(){const d=document.getElementById('disp');if(!d)return;d.textContent=Q.input;d.classList.toggle('empty',!Q.input)}
-const PRAISE=['Brilliant!','Spot on!','Super!','You got it!','Fantastic!','Great thinking!','Yes!','Well done!'];
-function submit(choiceIdx){const q=Q.qs[Q.i];if(Q.answered)return;let ok,given;
-  if(q.type==='num'){if(Q.input==='')return;ok=Number(Q.input)===Number(q.answer)}
-  else{given=q.choices[choiceIdx];ok=given===q.answer;document.querySelectorAll('.choice').forEach((b,i)=>{b.disabled=true;if(q.choices[i]===q.answer)b.classList.add('right');else if(i===choiceIdx)b.classList.add('wrong')})}
-  Q.answered=true;Q.res[Q.i]=ok;if(ok)Q.score++;else Q.wrong.push(q);store.done++;if(ok)store.right++;save();
-  const pd=document.getElementById('pad');if(pd)pd.hidden=true;
-  const disp=document.getElementById('disp');if(disp)disp.style.borderColor=ok?'var(--good)':'var(--bad)';
-  const shown=q.type==='num'?`${q.pre||''}${q.answer}${q.post?' '+q.post:''}`:q.answer;
-  const last=Q.i===N-1,fb=document.getElementById('fb');
-  fb.className='fb '+(ok?'good':'bad');
-  fb.innerHTML=`<div class="fbhead">${ok?pick(PRAISE):'Not quite.'}</div>${ok?'':`<div>The answer is <b>${shown}</b>.</div>${q.why?`<div class="why">${q.why}</div>`:''}`}<button class="next" data-act="next">${last?'See my score':'Next question'} →</button>`;
-  fb.hidden=false;fb.querySelector('.next').focus({preventScroll:true});fb.scrollIntoView({block:'nearest',behavior:'smooth'})}
-
-function next(){if(Q.i<N-1){Q.i++;renderQ()}else renderEnd()}
-
-function renderEnd(){const s=Q.score,st=starsFor(s);let isBest=false;
-  if(Q.single){const prev=store.best[Q.single];if(prev==null||s>prev){isBest=prev!=null&&s>prev||prev==null&&s>0;store.best[Q.single]=s}save()}
-  const msg=s===10?'Perfect score! Every single one right.':s>=8?'Brilliant work. You nearly got them all.':s>=5?'Good effort! Practise again to earn more stars.':'Keep going! Every try makes your brain stronger.';
-  const strand=Q.single?SKMAP[Q.single].strand:null;
-  app.innerHTML=header()+`<main class="wrap quiz end" style="--c:${strand?`var(--c-${strand})`:'var(--ink)'}">
-    <section class="qcard"><div class="bigstars">${stars3(st)}</div>
-      <h2>${s} out of ${N}${store.name?', '+esc(store.name):''}</h2><p class="sub">${msg}</p>${isBest?'<span class="badge">New best score!</span>':''}
-      <div class="btns"><button class="btn primary" data-act="again">Play again</button><button class="btn" data-act="home">All topics</button></div>
-      ${Q.wrong.length?`<div class="review"><h3>Let's look at these again</h3>${Q.wrong.map(q=>`<div class="rv" style="--c:var(--c-${SKMAP[q.skill].strand})"><div class="qtext">${q.q}</div>${q.vis||''}<div class="ra">Answer: ${q.type==='num'?`${q.pre||''}${q.answer}${q.post?' '+q.post:''}`:q.answer}</div>${q.why?`<div class="why">${q.why}</div>`:''}</div>`).join('')}</div>`:''}
-    </section></main>`;
-  window.scrollTo(0,0)}
-
-/* ---------- events ---------- */
-app.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act;
-  if(a==='home')renderHome();
-  else if(a==='skill'){const s=SKMAP[b.dataset.id];start([s.id],s.name,s.id)}
-  else if(a==='mix'){const st=STRANDS.find(x=>x.id===b.dataset.st);start(SK.filter(s=>s.strand===st.id).map(s=>s.id),st.name+' mix',null)}
-  else if(a==='mixall')start(SK.map(s=>s.id),'Mixed challenge',null);
-  else if(a==='again')start(Q.ids,Q.title,Q.single);
-  else if(a==='pick')submit(+b.dataset.i);
-  else if(a==='key')key(b.dataset.k);
-  else if(a==='next')next()});
-app.addEventListener('input',e=>{if(e.target.id==='kidname'){store.name=e.target.value.trim();save();const h=document.getElementById('hello');if(h)h.textContent=`Hello${store.name?', '+store.name:''}! What shall we practise today?`}});
-function key(k){if(!Q||Q.answered)return;if(k==='ok')return submit();if(k==='del')Q.input=Q.input.slice(0,-1);else if(Q.input.length<6)Q.input=(Q.input==='0'?'':Q.input)+k;updDisp()}
-document.addEventListener('keydown',e=>{if(!Q||e.target.tagName==='INPUT'||e.metaKey||e.ctrlKey||e.altKey)return;const q=Q.qs[Q.i];
-  if(Q.answered){if(e.key==='Enter'){e.preventDefault();if(document.querySelector('[data-act="next"]'))next()}return}
-  if(q.type==='num'){if(/^[0-9]$/.test(e.key))key(e.key);else if(e.key==='Backspace'){e.preventDefault();key('del')}else if(e.key==='Enter'){e.preventDefault();key('ok')}}
-  else if(/^[1-4]$/.test(e.key)&&+e.key<=q.choices.length)submit(+e.key-1)});
-
-renderHome();
-})();
-</script>
+<script src="js/core.js"></script>
+<script src="js/y1.js"></script>
+<script src="js/y2.js"></script>
+<script src="js/y3.js"></script>
+<script src="js/y4.js"></script>
+<script src="js/y5.js"></script>
+<script src="js/y6.js"></script>
+<script src="js/app.js"></script>
